@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="vi-VN" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị đơn nạp Xu TikTok - Đa Ngân Hàng</title>
+    <link rel="icon" type="image/webp" href="/default-avatar.webp">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#F8F8F8] text-[#121212] font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-shield-halved text-2xl text-[#FE2C55]"></i>
+                <span class="text-xl font-bold tracking-tight border-l pl-3 border-gray-300">Admin Dashboard</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-sm font-semibold text-gray-600 hover:text-[#FE2C55] transition flex items-center space-x-1">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Trang nạp xu</span>
+                </a>
+                <button id="btn-logout" onclick="adminLogout()" class="hidden text-sm font-semibold text-red-500 hover:text-red-700 transition flex items-center space-x-1">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Đăng xuất</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow space-y-6">
+
+        <!-- Form Đăng Nhập Admin -->
+        <div id="login-section" class="max-w-md mx-auto bg-white rounded-2xl p-8 shadow-sm border border-gray-200 mt-10">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-red-50 text-[#FE2C55] rounded-full flex items-center justify-center mx-auto text-xl mb-3">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">Đăng nhập Quản trị</h2>
+                <p class="text-xs text-gray-500 mt-1">Nhập mật khẩu quản trị để tiếp tục</p>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Mật khẩu Admin</label>
+                    <input type="password" id="admin-pass" placeholder="Nhập mật khẩu..." 
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#FE2C55]">
+                </div>
+                <button type="submit" class="w-full bg-[#FE2C55] hover:bg-[#e02649] text-white py-3 rounded-lg font-bold text-sm transition shadow-md">
+                    Đăng nhập
+                </button>
+            </form>
+        </div>
+
+        <!-- Bảng Quản Trị -->
+        <div id="admin-dashboard" class="hidden space-y-6">
+            
+            <!-- CẤU HÌNH ĐA NGÂN HÀNG -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div class="flex items-center justify-between mb-4 border-b pb-3">
+                    <div>
+                        <h2 class="text-base font-bold text-gray-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-building-columns text-[#FE2C55]"></i>
+                            <span>Cấu hình Đa Ngân Hàng & Bật/Tắt Trạng Thái</span>
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Bật/Tắt công tắc để kích hoạt hoặc tạm dừng ngân hàng tương ứng.</p>
+                    </div>
+                    <button onclick="addNewBankRow()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Thêm Ngân Hàng</span>
+                    </button>
+                </div>
+
+                <div id="banks-container" class="space-y-3"></div>
+
+                <div class="mt-4 flex justify-end">
+                    <button onclick="saveAllBanksConfig()" class="bg-gray-900 hover:bg-black text-white px-6 py-2.5 rounded-lg font-bold text-sm transition shadow-sm">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu tất cả ngân hàng
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bảng Quản Lý Khách Hàng & Zalo -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-base font-bold text-gray-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-users text-[#FE2C55]"></i>
+                        <span>Quản lý Khách hàng, SĐT Zalo & Avatar</span>
+                    </h2>
+                    <button onclick="loadUsersOnly()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-semibold transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Tải lại danh sách
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                                <th class="py-3 px-4">TikTok ID gốc</th>
+                                <th class="py-3 px-4">Tên hiển thị</th>
+                                <th class="py-3 px-4">SĐT Zalo</th>
+                                <th class="py-3 px-4">Avatar (Link / Tải lên)</th>
+                                <th class="py-3 px-4">Đăng nhập gần nhất</th>
+                                <th class="py-3 px-4 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="divide-y divide-gray-200 text-sm text-gray-700"></tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between text-xs text-gray-600">
+                    <span id="users-pagination-info">Hiển thị 0 - 0 của 0 khách hàng</span>
+                    <div class="space-x-1" id="users-pagination-buttons"></div>
+                </div>
+            </div>
+
+            <!-- Danh sách đơn hàng -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <h2 class="text-base font-bold text-gray-900 flex items-center space-x-2">
+                            <i class="fa-solid fa-list-check text-[#FE2C55]"></i>
+                            <span>Danh sách đơn nạp Xu</span>
+                        </h2>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 animate-pulse">
+                            <span class="w-1.5 h-1.5 mr-1.5 bg-green-500 rounded-full"></span> Auto-sync
+                        </span>
+                    </div>
+                    <button onclick="loadOrdersOnly()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-semibold transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Làm mới đơn
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                                <th class="py-3 px-4">Mã đơn / Thời gian</th>
+                                <th class="py-3 px-4">TikTok ID</th>
+                                <th class="py-3 px-4">Số Xu</th>
+                                <th class="py-3 px-4">Số tiền</th>
+                                <th class="py-3 px-4">Ngân hàng / Nội dung / Bill</th>
+                                <th class="py-3 px-4">Trạng thái</th>
+                                <th class="py-3 px-4 text-center">Thao tác duyệt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body" class="divide-y divide-gray-200 text-sm text-gray-700"></tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between text-xs text-gray-600">
+                    <span id="orders-pagination-info">Hiển thị 0 - 0 của 0 đơn hàng</span>
+                    <div class="space-x-1" id="orders-pagination-buttons"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Sửa Ngân Hàng -->
+    <div id="edit-bank-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+            <h3 class="text-base font-bold text-gray-900 flex items-center space-x-2 border-b pb-3">
+                <i class="fa-solid fa-pen-to-square text-[#FE2C55]"></i>
+                <span>Chỉnh sửa thông tin Ngân hàng</span>
+            </h3>
+            
+            <input type="hidden" id="edit-bank-index">
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Mã Ngân Hàng (VD: MBBank, VCB)</label>
+                    <input type="text" id="edit-bank-id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#FE2C55]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Số Tài Khoản</label>
+                    <input type="text" id="edit-bank-acc-no" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#FE2C55]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Tên Chủ Tài Khoản (KHÔNG DẤU)</label>
+                    <input type="text" id="edit-bank-acc-name" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#FE2C55]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-blue-700 mb-1">Nội dung Chuyển Khoản</label>
+                    <input type="text" id="edit-bank-memo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#FE2C55]">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-green-700 mb-1">Tối thiểu (VNĐ)</label>
+                        <input type="number" id="edit-bank-min" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#FE2C55]">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-red-700 mb-1">Tối đa (VNĐ)</label>
+                        <input type="number" id="edit-bank-max" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-[#FE2C55]">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeEditBankModal()" class="w-1/2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-bold text-xs transition">Hủy</button>
+                <button onclick="saveEditedBank()" class="w-1/2 bg-[#FE2C55] hover:bg-[#e02649] text-white py-2.5 rounded-xl font-bold text-xs transition">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-6 text-center text-xs text-gray-500">
+        <p>&copy; 2026 TikTok. Hệ thống Quản trị Nội bộ.</p>
+    </footer>
+
+    <!-- Script Quản Trị -->
+    <script>
+        const ADMIN_TOKEN_KEY = 'admin_secret_token_tiktok';
+        let autoRefreshTimer = null;
+
+        let bankList = [];
+        let allUsersData = [];
+        let currentUsersPage = 1;
+        let allOrdersData = [];
+        let currentOrdersPage = 1;
+        const pageSize = 10;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (token) {
+                showDashboard();
+            }
+        });
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('admin-pass').value;
+
+            try {
+                let res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                let data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+                    showDashboard();
+                } else {
+                    alert(data.message || "Mật khẩu không đúng!");
+                }
+            } catch (e) {
+                alert("Không thể kết nối đến Server Node.js!");
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            document.getElementById('btn-logout').classList.remove('hidden');
+            
+            loadAdminData();
+
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            autoRefreshTimer = setInterval(() => {
+                loadOrdersOnly(); 
+            }, 3000);
+        }
+
+        function adminLogout() {
+            localStorage.removeItem(ADMIN_TOKEN_KEY);
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            location.reload();
+        }
+
+        async function loadAdminData() {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+
+            try {
+                let bankRes = await fetch('/api/get-bank-config');
+                bankList = await bankRes.json();
+                renderBankList();
+            } catch (e) {}
+
+            loadOrdersOnly();
+            loadUsersOnly();
+        }
+
+        function renderBankList() {
+            const container = document.getElementById('banks-container');
+            container.innerHTML = '';
+
+            if (bankList.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-xs text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-300">Chưa có tài khoản ngân hàng nào.</div>`;
+                return;
+            }
+
+            bankList.forEach((bank, index) => {
+                const isActive = bank.active !== false;
+                
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${isActive ? 'bg-white border-gray-200 shadow-sm' : 'bg-gray-50/80 border-gray-200 opacity-60'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <div class="w-10 h-10 rounded-full bg-red-50 text-[#FE2C55] flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <span class="font-bold text-gray-900 text-sm">${bank.BANK_ID || 'Ngân hàng'}</span>
+                                <span class="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold border border-blue-100">${bank.ACCOUNT_NO || 'Chưa nhập STK'}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-0.5">
+                                Chủ TK: <strong class="text-gray-700">${bank.ACCOUNT_NAME || '---'}</strong> | Hạn mức: <span class="text-green-600 font-semibold">${(bank.minAmount || 0).toLocaleString()}đ</span> - <span class="text-red-600 font-semibold">${(bank.maxAmount || 0).toLocaleString()}đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between sm:justify-end space-x-3 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleBankActive(${index}, this.checked)" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600 relative"></div>
+                            <span class="ml-2 text-xs font-bold ${isActive ? 'text-green-700' : 'text-gray-400'}">${isActive ? 'Đang bật' : 'Đã tắt'}</span>
+                        </label>
+                        <button onclick="openEditBankModal(${index})" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+                            <i class="fa-solid fa-pen-to-square"></i><span>Sửa</span>
+                        </button>
+                        <button onclick="removeBankRow(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+                            <i class="fa-solid fa-trash"></i><span>Xóa</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleBankActive(index, checked) {
+            bankList[index].active = checked;
+            renderBankList();
+        }
+
+        function openEditBankModal(index) {
+            const bank = bankList[index];
+            document.getElementById('edit-bank-index').value = index;
+            document.getElementById('edit-bank-id').value = bank.BANK_ID || '';
+            document.getElementById('edit-bank-acc-no').value = bank.ACCOUNT_NO || '';
+            document.getElementById('edit-bank-acc-name').value = bank.ACCOUNT_NAME || '';
+            document.getElementById('edit-bank-memo').value = bank.MEMO || 'napxutt KTX';
+            document.getElementById('edit-bank-min').value = bank.minAmount !== undefined ? bank.minAmount : 0;
+            document.getElementById('edit-bank-max').value = bank.maxAmount !== undefined ? bank.maxAmount : 100000000;
+            document.getElementById('edit-bank-modal').classList.remove('hidden');
+        }
+
+        function closeEditBankModal() {
+            document.getElementById('edit-bank-modal').classList.add('hidden');
+        }
+
+        async function saveEditedBank() {
+            const index = parseInt(document.getElementById('edit-bank-index').value);
+            if (isNaN(index) || !bankList[index]) return;
+
+            bankList[index].BANK_ID = document.getElementById('edit-bank-id').value.trim();
+            bankList[index].ACCOUNT_NO = document.getElementById('edit-bank-acc-no').value.trim();
+            bankList[index].ACCOUNT_NAME = document.getElementById('edit-bank-acc-name').value.trim().toUpperCase();
+            bankList[index].MEMO = document.getElementById('edit-bank-memo').value.trim();
+            bankList[index].minAmount = parseInt(document.getElementById('edit-bank-min').value) || 0;
+            bankList[index].maxAmount = parseInt(document.getElementById('edit-bank-max').value) || 0;
+
+            closeEditBankModal();
+            renderBankList();
+            await saveAllBanksConfigSilent();
+        }
+
+        function addNewBankRow() {
+            bankList.push({
+                id: 'bank_' + Date.now(),
+                BANK_ID: 'MBBank',
+                ACCOUNT_NO: '',
+                ACCOUNT_NAME: '',
+                MEMO: 'napxutt KTX',
+                minAmount: 0,
+                maxAmount: 3000000,
+                active: true
+            });
+            renderBankList();
+        }
+
+        function removeBankRow(index) {
+            if (confirm("Bạn có chắc chắn muốn xóa ngân hàng này?")) {
+                bankList.splice(index, 1);
+                renderBankList();
+            }
+        }
+
+        async function saveAllBanksConfig() {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+
+            try {
+                let res = await fetch('/api/admin/save-bank-list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ banks: bankList })
+                });
+                let data = await res.json();
+                if (data.success) {
+                    alert("Đã lưu toàn bộ cấu hình ngân hàng thành công!");
+                } else {
+                    alert(data.message || "Lưu thất bại!");
+                }
+            } catch (e) {
+                alert("Lỗi kết nối tới Server!");
+            }
+        }
+
+        async function saveAllBanksConfigSilent() {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+            try {
+                await fetch('/api/admin/save-bank-list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ banks: bankList })
+                });
+            } catch (e) {}
+        }
+
+        async function loadOrdersOnly() {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+
+            try {
+                let orderRes = await fetch('/api/admin/orders', {
+                    headers: { 'Authorization': token }
+                });
+                let orderData = await orderRes.json();
+
+                if (orderData.success) {
+                    allOrdersData = orderData.orders;
+                    renderOrdersPage(currentOrdersPage);
+                } else if (orderRes.status === 403) {
+                    adminLogout();
+                }
+            } catch (e) {}
+        }
+
+        async function loadUsersOnly() {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+
+            try {
+                let res = await fetch('/api/admin/users', {
+                    headers: { 'Authorization': token }
+                });
+                let data = await res.json();
+                if (data.success) {
+                    allUsersData = data.users;
+                    renderUsersPage(currentUsersPage);
+                }
+            } catch (e) {}
+        }
+
+        // --- PHÂN TRANG KHÁCH HÀNG & ZALO ---
+        function renderUsersPage(page) {
+            currentUsersPage = page;
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            const totalItems = allUsersData.length;
+            if (totalItems === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-gray-400">Chưa có khách hàng nào đăng nhập.</td></tr>`;
+                document.getElementById('users-pagination-info').innerText = `Hiển thị 0 - 0 của 0 khách hàng`;
+                document.getElementById('users-pagination-buttons').innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(totalItems / pageSize);
+            if (currentUsersPage > totalPages) currentUsersPage = totalPages;
+
+            const startIdx = (currentUsersPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, totalItems);
+            const pageItems = allUsersData.slice(startIdx, endIdx);
+
+            pageItems.forEach(user => {
+                let currentAvatar = user.customAvatar || '/default-avatar.webp';
+                let zaloPhone = user.zalo || '';
+                let zaloLink = zaloPhone ? `<a href="https://zalo.me/${zaloPhone}" target="_blank" class="text-blue-600 font-bold hover:underline text-xs block mt-1"><i class="fa-solid fa-comment"></i> Chat Zalo</a>` : '<span class="text-gray-400 italic text-xs">Chưa có SĐT</span>';
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-gray-800">
+                        <div class="flex items-center space-x-2">
+                            <img src="${currentAvatar}" class="w-8 h-8 rounded-full border object-cover">
+                            <span>@${user.username}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <input type="text" id="nickname-${user.username}" value="${user.customNickname || user.username}" 
+                            class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs w-full sm:w-32 focus:outline-none focus:border-[#FE2C55]">
+                    </td>
+                    <td class="py-3 px-4">
+                        <input type="text" id="zalo-${user.username}" value="${zaloPhone}" placeholder="SĐT Zalo..." 
+                            class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs w-full sm:w-28 focus:outline-none focus:border-[#FE2C55]">
+                        ${zaloLink}
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="space-y-1">
+                            <input type="text" id="avatar-${user.username}" value="${currentAvatar}" placeholder="Dán link ảnh..."
+                                class="border border-gray-300 rounded-lg px-2.5 py-1 text-xs w-full focus:outline-none focus:border-[#FE2C55]">
+                            <label class="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-[11px] font-semibold border inline-block">
+                                <i class="fa-solid fa-upload mr-1"></i> Tải ảnh lên
+                                <input type="file" accept="image/*" class="hidden" onchange="uploadUserAvatar('${user.username}', this)">
+                            </label>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-xs text-gray-500">${new Date(user.lastLogin).toLocaleString('vi-VN')}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="saveUserInfo('${user.username}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">Lưu</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('users-pagination-info').innerText = `Hiển thị ${startIdx + 1} - ${endIdx} của ${totalItems} khách hàng`;
+            renderPaginationButtons('users', totalPages, currentUsersPage, renderUsersPage);
+        }
+
+        async function uploadUserAvatar(username, inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            const formData = new FormData();
+            formData.append('avatarFile', file);
+
+            try {
+                let res = await fetch('/api/admin/upload-avatar', {
+                    method: 'POST',
+                    headers: { 'Authorization': token },
+                    body: formData
+                });
+                let data = await res.json();
+                if (data.success) {
+                    document.getElementById(`avatar-${username}`).value = data.avatarUrl;
+                    alert("Đã tải ảnh lên thành công! Bấm 'Lưu' để áp dụng.");
+                } else {
+                    alert(data.message || "Lỗi tải ảnh!");
+                }
+            } catch (e) {
+                alert("Không thể kết nối máy chủ để tải ảnh!");
+            }
+        }
+
+        async function saveUserInfo(username) {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+
+            const customNickname = document.getElementById(`nickname-${username}`).value.trim();
+            const customAvatar = document.getElementById(`avatar-${username}`).value.trim();
+            const zalo = document.getElementById(`zalo-${username}`).value.trim();
+
+            try {
+                let res = await fetch('/api/admin/update-user-nickname', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ username, customNickname, customAvatar, zalo })
+                });
+                let data = await res.json();
+                if (data.success) {
+                    alert("Đã cập nhật thông tin thành công!");
+                    loadUsersOnly();
+                } else {
+                    alert(data.message || "Cập nhật thất bại!");
+                }
+            } catch (e) {
+                alert("Lỗi kết nối tới Server!");
+            }
+        }
+
+        // --- PHÂN TRANG ĐƠN HÀNG ---
+        function renderOrdersPage(page) {
+            currentOrdersPage = page;
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = '';
+
+            const totalItems = allOrdersData.length;
+            if (totalItems === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-gray-400">Chưa có đơn hàng nào.</td></tr>`;
+                document.getElementById('orders-pagination-info').innerText = `Hiển thị 0 - 0 của 0 đơn hàng`;
+                document.getElementById('orders-pagination-buttons').innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(totalItems / pageSize);
+            if (currentOrdersPage > totalPages) currentOrdersPage = totalPages;
+
+            const startIdx = (currentOrdersPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, totalItems);
+            const pageItems = allOrdersData.slice(startIdx, endIdx);
+
+            pageItems.forEach(order => {
+                let statusBadge = '';
+                if (order.status === 'PENDING') {
+                    statusBadge = `<span class="bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full text-xs">Đang chờ</span>`;
+                } else if (order.status === 'SUCCESS') {
+                    statusBadge = `<span class="bg-green-100 text-green-700 font-semibold px-2.5 py-1 rounded-full text-xs">Thành công</span>`;
+                } else if (order.status === 'REJECTED') {
+                    statusBadge = `<span class="bg-red-100 text-red-700 font-semibold px-2.5 py-1 rounded-full text-xs">Đã hủy</span>`;
+                }
+
+                let bankDisplay = order.bankInfo ? `${order.bankInfo.bankId} - ${order.bankInfo.accountNo}` : 'Default';
+                let billBtn = order.billImage 
+                    ? `<a href="${order.billImage}" target="_blank" class="inline-block mt-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded text-[11px] font-bold shadow-sm"><i class="fa-solid fa-image"></i> Xem Bill</a>` 
+                    : `<span class="text-[11px] text-gray-400 italic block mt-1">Chưa gửi bill</span>`;
+
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-gray-900 block">${order.id}</span>
+                        <span class="text-xs text-gray-400">${new Date(order.createdAt).toLocaleString('vi-VN')}</span>
+                    </td>
+                    <td class="py-3 px-4 font-semibold text-gray-800">@${order.username}</td>
+                    <td class="py-3 px-4 font-bold text-[#FE2C55]">${order.coins.toLocaleString('vi-VN')} Xu</td>
+                    <td class="py-3 px-4 font-semibold">${order.amount.toLocaleString('vi-VN')} đ</td>
+                    <td class="py-3 px-4">
+                        <span class="text-xs font-semibold text-gray-800 block">${bankDisplay}</span>
+                        <span class="bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-[11px] font-semibold border border-blue-200">${order.memo}</span>
+                        ${billBtn}
+                    </td>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center space-x-1">
+                            <button onclick="updateStatus('${order.id}', 'SUCCESS')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded text-xs font-bold transition">Duyệt</button>
+                            <button onclick="updateStatus('${order.id}', 'REJECTED')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded text-xs font-bold transition">Hủy</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('orders-pagination-info').innerText = `Hiển thị ${startIdx + 1} - ${endIdx} của ${totalItems} đơn hàng`;
+            renderPaginationButtons('orders', totalPages, currentOrdersPage, renderOrdersPage);
+        }
+
+        function renderPaginationButtons(type, totalPages, currentPage, callbackFunc) {
+            const container = document.getElementById(`${type}-pagination-buttons`);
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            let prevBtn = document.createElement('button');
+            prevBtn.innerText = '‹ Trước';
+            prevBtn.className = `px-2.5 py-1 rounded border text-xs font-semibold ${currentPage === 1 ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}`;
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => callbackFunc(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                let pageBtn = document.createElement('button');
+                pageBtn.innerText = i;
+                pageBtn.className = `px-2.5 py-1 rounded border text-xs font-semibold ${i === currentPage ? 'bg-[#FE2C55] text-white border-[#FE2C55]' : 'bg-white text-gray-700 hover:bg-gray-100'}`;
+                pageBtn.onclick = () => callbackFunc(i);
+                container.appendChild(pageBtn);
+            }
+
+            let nextBtn = document.createElement('button');
+            nextBtn.innerText = 'Sau ›';
+            nextBtn.className = `px-2.5 py-1 rounded border text-xs font-semibold ${currentPage === totalPages ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}`;
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => callbackFunc(currentPage + 1);
+            container.appendChild(nextBtn);
+        }
+
+        async function updateStatus(orderId, status) {
+            const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+            if (!token) return;
+
+            try {
+                let res = await fetch('/api/admin/update-order-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({ orderId, status })
+                });
+                let data = await res.json();
+                if (data.success) {
+                    loadOrdersOnly();
+                } else {
+                    alert(data.message || "Cập nhật thất bại!");
+                }
+            } catch (e) {
+                alert("Lỗi kết nối tới Server!");
+            }
+        }
+    </script>
+</body>
+</html>

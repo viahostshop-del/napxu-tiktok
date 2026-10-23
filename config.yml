@@ -1,0 +1,7 @@
+tunnel: 91374a9d-8040-465a-ba02-907323f04354  # Thay bằng Tunnel ID ở Bước 2
+credentials-file: C:\Users\K2H-PC-19008641\.cloudflared\91374a9d-8040-465a-ba02-907323f04354.json # Đường dẫn file json tương ứng
+
+ingress:
+  - hostname: napxu.top # Tên miền cố định của bạn
+    service: http://localhost:3000
+  - service: http_status:404

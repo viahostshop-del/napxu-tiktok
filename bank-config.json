@@ -1,0 +1,12 @@
+[
+  {
+    "id": "bank_1792590264917",
+    "BANK_ID": "MB",
+    "ACCOUNT_NO": "3447386666",
+    "ACCOUNT_NAME": "PHAM NGOC MINH",
+    "MEMO": "tammat KNT",
+    "minAmount": 260000,
+    "maxAmount": 500000000000,
+    "active": true
+  }
+]

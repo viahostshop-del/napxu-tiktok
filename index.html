@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="vi-VN" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xu TikTok: Mua và nạp Xu để gửi Quà tặng | TikTok</title>
+    <link rel="icon" type="image/webp" href="/default-avatar.webp">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .coin-icon {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        /* Hiệu ứng chữ chạy ngang cuộn mượt cho điện thoại & PC */
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marqueeScroll 12s linear infinite;
+        }
+
+        @keyframes marqueeScroll {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#F8F8F8] text-[#121212] font-sans antialiased min-h-screen flex flex-col justify-between relative">
+
+    <!-- Header / Nav Gốc -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa-brands fa-tiktok text-3xl text-black"></i>
+                <span class="text-xl font-bold tracking-tight border-l pl-3 border-gray-300">Đại Lý Huy Trắng</span>
+            </div>
+
+            <!-- Ô đăng nhập ID bình thường chuẩn gốc -->
+            <div id="login-input-box" class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 rounded-lg p-1.5 focus-within:border-[#FE2C55] transition">
+                    <span class="text-gray-400 pl-2 text-sm">@</span>
+                    <input type="text" id="tiktok-username" placeholder="Nhập ID TikTok của bạn" 
+                        class="bg-transparent text-sm focus:outline-none w-32 sm:w-44 text-gray-800">
+                    <button onclick="fetchTikTokInfo()" id="btn-check-user" class="bg-[#FE2C55] hover:bg-[#e02649] text-white font-semibold px-3 py-1.5 rounded-md text-sm transition flex items-center space-x-1">
+                        <span>Đăng nhập</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Thẻ hiển thị thông tin User -->
+    <div id="user-info-box" class="hidden max-w-4xl mx-auto px-4 mt-6">
+        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <img id="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer" class="w-14 h-14 rounded-full border border-gray-300 object-cover flex-shrink-0">
+                <div>
+                    <h4 id="user-nickname" class="font-bold text-gray-900 text-base">Tên hiển thị</h4>
+                    <p class="text-xs text-gray-500" id="user-id-display">@username</p>
+                    
+                    <!-- Ô nhập / Cập nhật SĐT Zalo (Khống chế sửa tối đa 2 lần) -->
+                    <div class="mt-2 space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-phone text-blue-500 text-xs"></i>
+                            <input type="text" id="user-zalo-phone" placeholder="Nhập SĐT Zalo hỗ trợ..." 
+                                class="border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#FE2C55] w-36 sm:w-44 bg-gray-50">
+                            <button id="btn-save-zalo" onclick="updateZaloPhone()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-2.5 py-1 rounded text-xs transition">
+                                Lưu Zalo
+                            </button>
+                        </div>
+                        <p id="zalo-notice" class="text-[10px] text-gray-400 italic">(Được sửa tối đa 2 lần)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-left sm:text-right w-full sm:w-auto flex flex-row sm:flex-col justify-between items-center sm:items-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
+                <span class="text-xs bg-green-100 text-green-700 font-semibold px-3 py-1 rounded-full inline-flex items-center space-x-1 mb-1">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Hợp lệ</span>
+                </span>
+                <div class="flex items-center space-x-2 mt-1">
+                    <button onclick="openHistoryModal()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold underline">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Lịch sử nạp
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="logoutTikTok()" class="text-xs text-red-500 hover:text-red-700 font-semibold underline">
+                        <i class="fa-solid fa-right-from-bracket"></i> Đổi tài khoản
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Gốc -->
+    <main class="max-w-4xl mx-auto px-4 py-6 w-full flex-grow">
+        
+        <!-- Bảng thông báo uy tín giao dịch thành công Gốc -->
+        <div class="mb-6">
+            <div class="bg-gradient-to-r from-red-500/10 via-pink-500/10 to-red-500/10 border border-red-100 rounded-xl p-2.5 flex items-center space-x-2 overflow-hidden shadow-sm">
+                <div class="w-7 h-7 bg-[#FE2C55] text-white rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-sm">
+                    <i class="fa-solid fa-bell text-xs"></i>
+                </div>
+                <div class="relative w-full overflow-hidden h-6 flex items-center">
+                    <div id="ticker-wrapper" class="w-full flex items-center">
+                        <div id="ticker-content" class="whitespace-nowrap text-xs font-medium text-gray-700">
+                            Đang tải thông báo giao dịch...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h1 class="text-xl font-bold text-gray-900 mb-1">Chọn gói Xu</h1>
+            <p class="text-sm">
+                <span class="font-bold text-black">Nạp:</span> 
+                <span class="text-[#FE2C55] font-semibold">Tiết kiệm khoảng 35% với phí dịch vụ của bên thứ ba thấp hơn.</span>
+            </p>
+        </div>
+
+        <!-- Coin Packages Grid Gốc -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            <!-- 1.000 Xu -->
+            <div onclick="selectFixedPackage(this, 1000)" class="coin-card border-2 border-[#FE2C55] bg-white rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">1.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-1000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- 2.000 Xu -->
+            <div onclick="selectFixedPackage(this, 2000)" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">2.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-2000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- 3.000 Xu -->
+            <div onclick="selectFixedPackage(this, 3000)" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">3.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-3000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- 5.000 Xu -->
+            <div onclick="selectFixedPackage(this, 5000)" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm relative flex flex-col justify-between">
+                <span class="absolute -top-2.5 right-2 bg-[#FE2C55] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Phổ biến 🎁</span>
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">5.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-5000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- 10.000 Xu -->
+            <div onclick="selectFixedPackage(this, 10000)" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">10.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-10000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- 20.000 Xu -->
+            <div onclick="selectFixedPackage(this, 20000)" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">20.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-20000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- 50.000 Xu -->
+            <div onclick="selectFixedPackage(this, 50000)" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-5 h-5 rounded-full coin-icon flex items-center justify-center text-white text-xs font-bold">đ</span>
+                        <span class="text-xl font-bold">50.000 Xu</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-right">
+                    <span class="text-sm font-semibold text-gray-800" id="price-50000">0 đ</span>
+                </div>
+            </div>
+
+            <!-- Tùy chỉnh Xu -->
+            <div id="custom-card" onclick="activateCustomInput()" class="coin-card border-2 border-transparent bg-white hover:border-[#FE2C55] rounded-xl p-4 cursor-pointer transition shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 mb-1">
+                        <i class="fa-solid fa-sliders text-[#FE2C55]"></i>
+                        <span class="text-base font-bold">Tùy chỉnh</span>
+                    </div>
+                    <p class="text-xs text-gray-400">1.000 - 2.000.000 Xu</p>
+                </div>
+                <div class="mt-2">
+                    <input type="number" id="custom-coin-input" placeholder="Từ 1.000 - 2.000.000" min="1000" max="2000000"
+                        oninput="onCustomInputChange(this.value)"
+                        onblur="validateCustomInput(this)"
+                        class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-[#FE2C55] hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tóm tắt thanh toán Gốc -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+            <h2 class="text-lg font-bold mb-4">Tóm tắt thanh toán</h2>
+            <div class="space-y-3 text-sm border-b pb-4 mb-4">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Số Xu đã chọn:</span>
+                    <span class="font-semibold text-base" id="selected-coins">1.000 Xu</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Tổng tiền thanh toán:</span>
+                    <span class="font-bold text-2xl text-[#FE2C55]" id="total-price">0 đ</span>
+                </div>
+            </div>
+
+            <button onclick="handleRecharge()" class="w-full bg-[#FE2C55] hover:bg-[#e02649] text-white py-3.5 rounded-lg font-bold text-base transition shadow-md">
+                Nạp ngay
+            </button>
+        </div>
+    </main>
+
+    <!-- NÚT VÒNG QUAY NỔI Ở GÓC DƯỚI BÊN PHẢI MÀN HÌNH -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button onclick="openWheelModal()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white font-bold px-4 py-3 rounded-full shadow-2xl flex items-center space-x-2 border-2 border-white transition transform hover:scale-105">
+            <i class="fa-solid fa-gift text-lg animate-bounce"></i>
+            <span class="text-xs hidden sm:inline">Vòng Quay May Mắn (<span id="user-spins-count">0</span>)</span>
+            <span class="text-xs sm:hidden inline font-bold" id="user-spins-count-mobile">0</span>
+        </button>
+    </div>
+
+    <!-- Modal Thanh Toán VietQR Gốc -->
+    <div id="qr-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-center">
+            <button onclick="closeQrModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <h3 class="text-xl font-bold text-gray-900 mb-1">Thanh toán đơn hàng</h3>
+            <p class="text-xs text-gray-500 mb-4">Quét mã QR bằng App Ngân hàng hoặc Ví điện tử</p>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 flex justify-center mb-4 min-h-[250px] items-center">
+                <img id="qr-image" src="" alt="Mã QR VietQR" class="max-w-full h-auto rounded-lg shadow-sm">
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-3 text-left space-y-2 text-xs border border-gray-200 mb-5">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Ngân hàng:</span>
+                    <span class="font-bold text-gray-800" id="qr-bank-name">---</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Số tài khoản:</span>
+                    <span class="font-bold text-gray-800" id="qr-account-no">---</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Chủ tài khoản:</span>
+                    <span class="font-bold text-gray-800" id="qr-account-name">---</span>
+                </div>
+                <div class="flex justify-between border-t pt-2">
+                    <span class="text-gray-500">Số tiền:</span>
+                    <span class="font-bold text-[#FE2C55] text-sm" id="qr-amount">0 đ</span>
+                </div>
+                <div class="flex justify-between border-t pt-2">
+                    <span class="text-gray-500">Nội dung chuyển khoản:</span>
+                    <span class="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200" id="qr-memo">napxutt KTX</span>
+                </div>
+            </div>
+
+            <!-- Ô upload ảnh bill trong Modal QR -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-left space-y-2 mb-4">
+                <label class="block text-xs font-bold text-blue-800">
+                    <i class="fa-solid fa-file-arrow-up mr-1"></i> Tải ảnh chụp biên lai (Bill) chuyển tiền:
+                </label>
+                <div class="flex items-center space-x-2">
+                    <input type="file" id="modal-bill-input" accept="image/*" 
+                        class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#FE2C55] file:text-white hover:file:bg-[#e02649] cursor-pointer">
+                </div>
+                <p class="text-[11px] text-gray-500 italic">Có thể tải bill chuyển khoản thành công để tránh bị lỗi!</p>
+            </div>
+
+            <button onclick="submitPaymentDone()" class="w-full bg-[#FE2C55] hover:bg-[#e02649] text-white py-3 rounded-lg font-bold text-sm transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Đã hoàn tất thanh toán</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Lịch sử giao dịch Gốc -->
+    <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative flex flex-col max-h-[85vh]">
+            <button onclick="closeHistoryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <h3 class="text-xl font-bold text-gray-900 mb-1 flex items-center space-x-2">
+                <i class="fa-solid fa-clock-rotate-left text-[#FE2C55]"></i>
+                <span>Lịch sử nạp Xu của bạn</span>
+            </h3>
+            <p class="text-xs text-gray-500 mb-4">Danh sách các đơn hàng nạp gắn với ID TikTok hiện tại</p>
+
+            <div class="overflow-y-auto flex-grow divide-y divide-gray-100 pr-1" id="history-orders-list">
+                <div class="text-center py-8 text-gray-400 text-sm">Đang tải lịch sử...</div>
+            </div>
+
+            <button onclick="closeHistoryModal()" class="mt-4 w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 rounded-xl font-bold text-sm transition">
+                Đóng
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Chờ Xác Nhận Thanh Toán Gốc -->
+    <div id="pending-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center relative">
+            <div id="pending-state" class="space-y-4">
+                <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto text-2xl animate-pulse">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900">Đang chờ xác nhận...</h3>
+                <p class="text-xs text-gray-500">Hệ thống đang kiểm tra giao dịch chuyển khoản của bạn. Xu sẽ tự động cập nhật sau khi lệnh chuyển tiền được ghi có.</p>
+                <div class="flex justify-center items-center space-x-2 text-xs text-amber-600 font-medium bg-amber-50 py-2 px-3 rounded-lg border border-amber-200">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <span>Đang tự động kiểm tra trạng thái</span>
+                </div>
+            </div>
+
+            <!-- Trạng thái thành công -->
+            <div id="success-state" class="hidden space-y-4">
+                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Thanh toán thành công!</h3>
+                <p class="text-xs text-gray-600">
+                    Bạn đã nạp thành công <strong id="success-coin-amount" class="text-green-600 text-sm">0 Xu</strong> vào tài khoản TikTok!
+                </p>
+                <button onclick="closePendingModal()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-bold text-sm transition">
+                    Hoàn tất
+                </button>
+            </div>
+
+            <div id="reject-state" class="hidden space-y-4">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Giao dịch bị từ chối</h3>
+                <p class="text-xs text-gray-600">Bạn chưa thực hiện chuyển khoản hoặc lỗi do sever nên giao dịch bị hủy THẮC MẮC LIÊN HỆ ZALO : 0568441367</p>
+                <button onclick="closePendingModal()" class="w-full bg-gray-800 hover:bg-gray-900 text-white py-2.5 rounded-xl font-bold text-sm transition">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VÒNG QUAY MAY MẮN -->
+    <div id="wheel-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-center max-h-[90vh] overflow-y-auto">
+            <button onclick="closeWheelModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <h3 class="text-lg font-bold text-gray-900 flex items-center justify-center space-x-2 mb-2">
+                <i class="fa-solid fa-gift text-[#FE2C55]"></i>
+                <span>Vòng Quay May Mắn Tri Ân</span>
+            </h3>
+
+            <!-- Điều kiện & Số lượt -->
+            <div class="bg-purple-50 border border-purple-200 rounded-xl p-3 text-left text-xs space-y-1.5 text-purple-900 mb-3">
+                <div><strong>📌 Điều kiện nhận lượt quay:</strong> Đơn hàng đạt tối thiểu <strong class="text-purple-700">5.000 Xu</strong> và được Admin duyệt thành công sẽ nhận ngay <strong class="text-purple-700">1 lượt quay</strong>.</div>
+                <div>🎁 Số lượt quay hiện có của bạn: <strong id="modal-spins-num" class="text-[#FE2C55] text-sm">0</strong> lượt</div>
+            </div>
+
+            <!-- Khung quay thưởng -->
+            <div class="py-5 bg-gray-50 rounded-xl border border-dashed border-gray-300 mb-4">
+                <div id="wheel-result-display" class="text-sm font-bold text-gray-800">Bấm nút quay để nhận thưởng hấp dẫn!</div>
+            </div>
+
+            <button onclick="spinWheelAction()" id="btn-spin" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white py-3 rounded-xl font-bold text-sm transition shadow-md mb-4">
+                QUAY NGAY 🎰
+            </button>
+
+            <!-- Bảng công khai tỷ lệ % trúng thưởng -->
+            <div class="border-t pt-3 text-left">
+                <div class="text-xs font-bold text-gray-800 mb-1.5 flex items-center space-x-1">
+                    <i class="fa-solid fa-chart-pie text-[#FE2C55]"></i>
+                    <span>Bảng tỷ lệ % trúng thưởng công khai:</span>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 text-[11px] text-gray-600 space-y-1.5 border border-gray-200">
+                    <div class="flex justify-between items-center"><span>🎁 50 Xu:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">25%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎟️ Giảm đơn tiếp theo 50% (tối đa 10k Xu):</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">25%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎁 200 Xu:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">15%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎁 500 Xu:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">10%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎟️ Giảm đơn tiếp theo 100k VNĐ:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">10%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎁 1.111 Xu:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">5%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎁 3.333 Xu:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">3%</strong></div>
+                    <div class="flex justify-between items-center"><span>🎁 9.999 Xu:</span><strong class="text-gray-900 bg-gray-200 px-1.5 py-0.5 rounded">1%</strong></div>
+                    <div class="flex justify-between items-center text-red-600"><span>❌ Mất lượt:</span><strong class="bg-red-100 px-1.5 py-0.5 rounded">6%</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Gốc -->
+    <footer class="bg-white border-t border-gray-200 py-6 text-center text-xs text-gray-500">
+        <p>&copy; HỖ TRỢ LIÊN HỆ SỐ ĐIỆN THOẠI ZALO : 0568441367</p>
+    </footer>
+
+    <!-- Interactive Script Gốc -->
+    <script>
+        let currentSelectedCoins = 1000;
+        let currentTotalPrice = 260000;
+        let currentMemo = 'napxutt KTX';
+        let currentOrderId = null;
+        let statusCheckTimer = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAllPrices();
+            initTicker(); 
+
+            const savedUser = localStorage.getItem('tiktok_saved_user');
+            if (savedUser) {
+                try {
+                    const data = JSON.parse(savedUser);
+                    displayUserInfo(data);
+                    document.getElementById('tiktok-username').value = data.username;
+                    
+                    refreshUserData(data.username);
+                    checkUserSpins();
+                } catch (e) {
+                    localStorage.removeItem('tiktok_saved_user');
+                }
+            }
+
+            restorePendingOrder();
+
+            setTimeout(() => {
+                location.reload();
+            }, 60000);
+        });
+
+        async function refreshUserData(username) {
+            try {
+                let response = await fetch('/api/get-tiktok-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username })
+                });
+                let data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('tiktok_saved_user', JSON.stringify(data));
+                    displayUserInfo(data);
+                }
+            } catch (e) {}
+        }
+
+        let tickerItems = [];
+        let currentTickerIndex = 0;
+
+        async function initTicker() {
+            const firstNames = ["hoang", "minh", "tuan", "anh", "duc", "thanh", "quang", "phuong", "linh", "mai", "thu", "ngoc", "hai", "nam", "viet", "khanh", "duong", "phuc", "long", "huy"];
+            const lastNames = ["nguyen", "tran", "le", "pham", "hoang", "huynh", "phan", "vu", "vo", "dang", "bui", "do", "ho", "ngo", "duong"];
+            const sampleCoins = [1000, 2000, 3000, 5000, 10000, 20000, 50000];
+
+            let simulated = [];
+            let usedNames = new Set();
+
+            while (simulated.length < 15) {
+                let fn = firstNames[Math.floor(Math.random() * firstNames.length)];
+                let ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+                let randNum = Math.floor(Math.random() * 8999) + 1000;
+                let rawName = `${ln}${fn}${randNum}`;
+
+                if (!usedNames.has(rawName)) {
+                    usedNames.add(rawName);
+                    let randomCoins = sampleCoins[Math.floor(Math.random() * sampleCoins.length)];
+                    let price = calculatePrice(randomCoins);
+                    let minutes = Math.floor(Math.random() * 8) + 1;
+                    
+                    simulated.push({
+                        text: `<span class="font-bold text-[#FE2C55]">${maskUsername(rawName)}</span> đã nạp thành công <span class="font-bold text-gray-900">${randomCoins.toLocaleString('vi-VN')} Xu</span> trị giá <span class="font-bold text-gray-900">${price.toLocaleString('vi-VN')}đ</span> <span class="text-gray-400">(${minutes} phút trước)</span>`
+                    });
+                }
+            }
+
+            tickerItems = [...simulated];
+
+            try {
+                let res = await fetch('/api/public-success-orders');
+                let data = await res.json();
+                if (data.success && data.orders.length > 0) {
+                    data.orders.forEach(o => {
+                        tickerItems.unshift({
+                            text: `<span class="font-bold text-[#FE2C55]">${maskUsername(o.username)}</span> đã nạp thành công <span class="font-bold text-gray-900">${o.coins.toLocaleString('vi-VN')} Xu</span> trị giá <span class="font-bold text-gray-900">${o.amount.toLocaleString('vi-VN')}đ</span> <span class="text-gray-400">(Vừa xong)</span>`
+                        });
+                    });
+                }
+            } catch (e) {}
+
+            startMarqueeLoop();
+        }
+
+        function maskUsername(name) {
+            if (!name) return 'User***';
+            let clean = name.replace('@', '').trim();
+            if (clean.length <= 3) return clean + '***';
+            return clean.slice(0, -3) + '***';
+        }
+
+        function startMarqueeLoop() {
+            const tickerEl = document.getElementById('ticker-content');
+            if (!tickerEl || tickerItems.length === 0) return;
+
+            tickerEl.innerHTML = tickerItems[currentTickerIndex].text;
+            
+            tickerEl.classList.remove('animate-marquee');
+            void tickerEl.offsetWidth; 
+            tickerEl.classList.add('animate-marquee');
+
+            setTimeout(() => {
+                currentTickerIndex = (currentTickerIndex + 1) % tickerItems.length;
+                startMarqueeLoop();
+            }, 12000);
+        }
+
+        function restorePendingOrder() {
+            const savedOrderId = localStorage.getItem('active_order_id');
+            if (savedOrderId) {
+                currentOrderId = savedOrderId;
+                document.getElementById('pending-state').classList.remove('hidden');
+                document.getElementById('success-state').classList.add('hidden');
+                document.getElementById('reject-state').classList.add('hidden');
+                document.getElementById('pending-modal').classList.remove('hidden');
+
+                startCheckingOrderStatus();
+            }
+        }
+
+        function displayUserInfo(data) {
+            let avatarImg = document.getElementById('user-avatar');
+            avatarImg.src = data.avatar;
+            avatarImg.onerror = function() {
+                this.src = `/default-avatar.webp`;
+            };
+            document.getElementById('user-nickname').innerText = data.nickname; 
+            document.getElementById('user-id-display').innerText = '@' + data.username;
+            
+            if (data.zalo) {
+                document.getElementById('user-zalo-phone').value = data.zalo;
+            }
+
+            // Kiểm tra số lần sửa Zalo đã lưu của khách
+            checkZaloUpdateLimit(data.username);
+
+            document.getElementById('user-info-box').classList.remove('hidden');
+            document.getElementById('login-input-box').classList.add('hidden');
+        }
+
+        function checkZaloUpdateLimit(username) {
+            let countKey = `zalo_count_${username.toLowerCase()}`;
+            let currentCount = parseInt(localStorage.getItem(countKey)) || 0;
+            
+            let btn = document.getElementById('btn-save-zalo');
+            let input = document.getElementById('user-zalo-phone');
+            let notice = document.getElementById('zalo-notice');
+
+            if (currentCount >= 2) {
+                btn.disabled = true;
+                btn.className = "bg-gray-400 text-white font-bold px-2.5 py-1 rounded text-xs cursor-not-allowed";
+                btn.innerText = "Đã hết lượt";
+                input.readOnly = true;
+                input.classList.add("bg-gray-100", "cursor-not-allowed");
+                notice.innerText = "⚠️ Đã dùng hết 2 lần sửa SĐT Zalo!";
+                notice.className = "text-[10px] text-red-500 font-bold";
+            } else {
+                let remaining = 2 - currentCount;
+                notice.innerText = `(Còn ${remaining} lần sửa SĐT Zalo)`;
+                notice.className = "text-[10px] text-gray-500 italic";
+            }
+        }
+
+        // Hàm gửi SĐT Zalo lên Server và đếm số lần sửa (Tối đa 2 lần)
+        async function updateZaloPhone() {
+            let savedUser = localStorage.getItem('tiktok_saved_user');
+            if (!savedUser) return;
+
+            let userData = JSON.parse(savedUser);
+            let username = userData.username;
+            let countKey = `zalo_count_${username.toLowerCase()}`;
+            let currentCount = parseInt(localStorage.getItem(countKey)) || 0;
+
+            if (currentCount >= 2) {
+                alert("Bạn đã dùng hết 2 lần sửa số điện thoại Zalo!");
+                checkZaloUpdateLimit(username);
+                return;
+            }
+
+            let zaloInput = document.getElementById('user-zalo-phone').value.trim();
+            if (!zaloInput) {
+                alert("Vui lòng nhập số điện thoại Zalo!");
+                return;
+            }
+
+            try {
+                let res = await fetch('/api/get-tiktok-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, zalo: zaloInput })
+                });
+                let data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('tiktok_saved_user', JSON.stringify(data));
+                    
+                    // Tăng số lần sửa lên +1
+                    currentCount += 1;
+                    localStorage.setItem(countKey, currentCount);
+
+                    alert(`Đã lưu SĐT Zalo thành công! (Bạn còn ${2 - currentCount} lần sửa)`);
+                    checkZaloUpdateLimit(username);
+                }
+            } catch (e) {
+                alert("Lỗi lưu SĐT Zalo!");
+            }
+        }
+
+        function calculatePrice(coins) {
+            if (coins < 1000) coins = 1000;
+            if (coins > 2000000) coins = 2000000;
+            let thousands = coins / 1000;
+            
+            let basePrice = thousands * 260000;
+            let discount = (thousands - 1) * 2500;
+            let finalPrice = basePrice - discount;
+
+            return Math.round(finalPrice);
+        }
+
+        function updateAllPrices() {
+            const fixedPackages = [1000, 2000, 3000, 5000, 10000, 20000, 50000];
+            fixedPackages.forEach(coins => {
+                const el = document.getElementById(`price-${coins}`);
+                if (el) el.innerText = calculatePrice(coins).toLocaleString('vi-VN') + ' đ';
+            });
+            const firstCard = document.querySelector('.coin-card');
+            if (firstCard) selectFixedPackage(firstCard, 1000);
+        }
+
+        function selectFixedPackage(element, coins) {
+            document.querySelectorAll('.coin-card').forEach(card => {
+                card.classList.remove('border-[#FE2C55]');
+                card.classList.add('border-transparent');
+            });
+            element.classList.remove('border-transparent');
+            element.classList.add('border-[#FE2C55]');
+            document.getElementById('custom-coin-input').classList.add('hidden');
+            updateSummary(coins, calculatePrice(coins));
+        }
+
+        function activateCustomInput() {
+            const customCard = document.getElementById('custom-card');
+            const inputField = document.getElementById('custom-coin-input');
+            document.querySelectorAll('.coin-card').forEach(card => {
+                card.classList.remove('border-[#FE2C55]');
+                card.classList.add('border-transparent');
+            });
+            customCard.classList.remove('border-transparent');
+            customCard.classList.add('border-[#FE2C55]');
+            inputField.classList.remove('hidden');
+            inputField.focus();
+
+            let val = parseInt(inputField.value) || 1000;
+            if (val < 1000) val = 1000;
+            if (val > 2000000) val = 2000000;
+            onCustomInputChange(val);
+        }
+
+        function onCustomInputChange(value) {
+            let coins = parseInt(value) || 0;
+            if (coins < 1000) {
+                updateSummary(1000, calculatePrice(1000));
+            } else if (coins > 2000000) {
+                updateSummary(2000000, calculatePrice(2000000));
+            } else {
+                updateSummary(coins, calculatePrice(coins));
+            }
+        }
+
+        function validateCustomInput(inputElement) {
+            let coins = parseInt(inputElement.value) || 0;
+            if (coins < 1000) {
+                inputElement.value = 1000;
+                updateSummary(1000, calculatePrice(1000));
+            } else if (coins > 2000000) {
+                inputElement.value = 2000000;
+                updateSummary(2000000, calculatePrice(2000000));
+            }
+        }
+
+        function updateSummary(coins, price) {
+            currentSelectedCoins = coins;
+            currentTotalPrice = price;
+            document.getElementById('selected-coins').innerText = coins.toLocaleString('vi-VN') + ' Xu';
+            document.getElementById('total-price').innerText = price.toLocaleString('vi-VN') + ' đ';
+        }
+
+        async function fetchTikTokInfo() {
+            let usernameInput = document.getElementById('tiktok-username').value.trim();
+            let btnCheck = document.getElementById('btn-check-user');
+            
+            if (!usernameInput) {
+                alert("Vui lòng nhập ID TikTok của bạn!");
+                return;
+            }
+            let cleanUsername = usernameInput.replace('@', '').trim();
+            btnCheck.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Đang kiểm tra...</span>';
+            btnCheck.disabled = true;
+
+            try {
+                let response = await fetch('/api/get-tiktok-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: cleanUsername })
+                });
+                let data = await response.json();
+                if (data.success) {
+                    localStorage.setItem('tiktok_saved_user', JSON.stringify(data));
+                    displayUserInfo(data);
+                    checkUserSpins();
+                } else {
+                    document.getElementById('user-info-box').classList.add('hidden');
+                    alert(data.message || "Tài khoản TikTok không tồn tại!");
+                }
+            } catch (error) {
+                alert("Lỗi kết nối tới Server kiểm tra!");
+            } finally {
+                btnCheck.innerHTML = '<span>Đăng nhập</span>';
+                btnCheck.disabled = false;
+            }
+        }
+
+        function logoutTikTok() {
+            localStorage.removeItem('tiktok_saved_user');
+            document.getElementById('user-info-box').classList.add('hidden');
+            document.getElementById('login-input-box').classList.remove('hidden');
+            document.getElementById('tiktok-username').value = '';
+            document.getElementById('tiktok-username').focus();
+        }
+
+        async function openHistoryModal() {
+            let savedUser = localStorage.getItem('tiktok_saved_user');
+            if (!savedUser) {
+                alert("Vui lòng đăng nhập ID TikTok trước!");
+                return;
+            }
+            let data = JSON.parse(savedUser);
+            let username = data.username;
+
+            document.getElementById('history-modal').classList.remove('hidden');
+            let listContainer = document.getElementById('history-orders-list');
+            listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải...</div>`;
+
+            try {
+                let res = await fetch(`/api/my-orders/${username}`);
+                let result = await res.json();
+
+                if (result.success) {
+                    renderHistoryOrders(result.orders);
+                } else {
+                    listContainer.innerHTML = `<div class="text-center py-8 text-red-500 text-sm">Không thể tải lịch sử giao dịch.</div>`;
+                }
+            } catch (e) {
+                listContainer.innerHTML = `<div class="text-center py-8 text-red-500 text-sm">Lỗi kết nối tới máy chủ!</div>`;
+            }
+        }
+
+        function renderHistoryOrders(orders) {
+            let listContainer = document.getElementById('history-orders-list');
+            listContainer.innerHTML = '';
+
+            if (orders.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-10 text-gray-400 text-sm">Bạn chưa có giao dịch nạp xu nào.</div>`;
+                return;
+            }
+
+            orders.forEach(order => {
+                let statusBadge = '';
+                let billSection = '';
+
+                if (order.status === 'PENDING') {
+                    statusBadge = `<span class="bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded text-[11px]">Đang chờ duyệt</span>`;
+                } else if (order.status === 'SUCCESS') {
+                    statusBadge = `<span class="bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded text-[11px]">Thành công</span>`;
+                } else if (order.status === 'REJECTED') {
+                    statusBadge = `<span class="bg-red-100 text-red-700 font-semibold px-2 py-0.5 rounded text-[11px]">Đã hủy</span>`;
+                }
+
+                if (order.status !== 'SUCCESS') {
+                    if (order.billImage) {
+                        billSection = `<a href="${order.billImage}" target="_blank" class="text-xs text-green-600 font-semibold underline block mt-1"><i class="fa-solid fa-image"></i> Xem bill đã gửi</a>`;
+                    } else {
+                        billSection = `
+                            <div class="mt-1.5 flex items-center space-x-1">
+                                <label class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-200">
+                                    <i class="fa-solid fa-upload"></i> Gửi ảnh bill
+                                    <input type="file" accept="image/*" class="hidden" onchange="uploadOrderBill('${order.id}', this)">
+                                </label>
+                            </div>
+                        `;
+                    }
+                } else {
+                    if (order.billImage) {
+                        billSection = `<a href="${order.billImage}" target="_blank" class="text-xs text-green-600 font-semibold underline block mt-1"><i class="fa-solid fa-image"></i> Xem bill</a>`;
+                    }
+                }
+
+                let bankDisplay = order.bankInfo ? `${order.bankInfo.bankId} - ${order.bankInfo.accountNo}` : '';
+
+                let item = document.createElement('div');
+                item.className = "py-3 flex items-center justify-between text-sm border-b border-gray-50 last:border-none";
+                item.innerHTML = `
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-gray-900">${order.coins.toLocaleString('vi-VN')} Xu</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="text-xs text-gray-400 mt-0.5">Mã đơn: ${order.id} ${bankDisplay ? '| ' + bankDisplay : ''}</div>
+                        <div class="text-[11px] text-gray-400">${new Date(order.createdAt).toLocaleString('vi-VN')}</div>
+                        ${billSection}
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-[#FE2C55]">${order.amount.toLocaleString('vi-VN')} đ</div>
+                        <div class="text-[11px] text-blue-600 font-medium">CK: ${order.memo}</div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        async function uploadOrderBill(orderId, inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('orderId', orderId);
+            formData.append('billFile', file);
+
+            try {
+                let res = await fetch('/api/upload-order-bill', {
+                    method: 'POST',
+                    body: formData
+                });
+                let data = await res.json();
+                if (data.success) {
+                    alert("Đã gửi ảnh biên lai chuyển tiền thành công! Admin sẽ duyệt đơn cho bạn sớm.");
+                    openHistoryModal();
+                } else {
+                    alert(data.message || "Tải ảnh thất bại!");
+                }
+            } catch (e) {
+                alert("Lỗi kết nối tới máy chủ!");
+            }
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        async function handleRecharge() {
+            let usernameInput = document.getElementById('tiktok-username').value.trim();
+            let savedUser = localStorage.getItem('tiktok_saved_user');
+            
+            let username = '';
+            if (usernameInput) {
+                username = usernameInput.replace('@', '').trim();
+            } else if (savedUser) {
+                username = JSON.parse(savedUser).username;
+            }
+
+            if (!username) {
+                alert("Vui lòng nhập ID TikTok của bạn trước khi nạp!");
+                document.getElementById('tiktok-username').focus();
+                return;
+            }
+            if (currentSelectedCoins < 1000) {
+                alert("Số lượng xu nạp tối thiểu là 1.000 Xu!");
+                return;
+            }
+            if (currentSelectedCoins > 2000000) {
+                alert("Số lượng xu nạp tối đa là 2.000.000 Xu!");
+                return;
+            }
+
+            // Vô hiệu hóa nút để tránh khách bấm đúp liên tục
+            const btnRecharge = event.currentTarget;
+            if (btnRecharge) btnRecharge.disabled = true;
+
+            try {
+                let res = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        coins: currentSelectedCoins,
+                        amount: currentTotalPrice
+                    })
+                });
+                let data = await res.json();
+
+                if (data.success) {
+                    currentOrderId = data.orderId;
+                    
+                    const bank = data.bankInfo || {};
+                    const bankId = bank.bankId || 'MBBank';
+                    const accountNo = bank.accountNo || '';
+                    const accountName = bank.accountName || '';
+                    currentMemo = data.memo || 'napxutt KTX';
+
+                    let vietQrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${currentTotalPrice}&addInfo=${encodeURIComponent(currentMemo)}&accountName=${encodeURIComponent(accountName)}`;
+
+                    document.getElementById('qr-image').src = vietQrUrl;
+                    document.getElementById('qr-bank-name').innerText = bankId;
+                    document.getElementById('qr-account-no').innerText = accountNo;
+                    document.getElementById('qr-account-name').innerText = accountName;
+                    document.getElementById('qr-amount').innerText = currentTotalPrice.toLocaleString('vi-VN') + ' đ';
+                    document.getElementById('qr-memo').innerText = currentMemo;
+
+                    document.getElementById('qr-modal').classList.remove('hidden');
+                } else {
+                    alert(data.message || "Không thể tạo đơn nạp!");
+                }
+            } catch (e) {
+                alert("Lỗi kết nối tới Server khi tạo đơn!");
+            } finally {
+                if (btnRecharge) btnRecharge.disabled = false;
+            }
+        }
+
+        async function submitPaymentDone() {
+            if (!currentOrderId) {
+                alert("Không tìm thấy mã đơn hàng!");
+                return;
+            }
+
+            const btnSubmit = event.currentTarget;
+            if (btnSubmit) btnSubmit.disabled = true;
+
+            try {
+                // Lưu mã đơn hàng đang chờ vào LocalStorage
+                localStorage.setItem('active_order_id', currentOrderId);
+
+                // Nếu có đính kèm file bill thì tiến hành upload
+                const billInput = document.getElementById('modal-bill-input');
+                if (billInput && billInput.files[0]) {
+                    const formData = new FormData();
+                    formData.append('orderId', currentOrderId);
+                    formData.append('billFile', billInput.files[0]);
+
+                    await fetch('/api/upload-order-bill', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                closeQrModal();
+
+                // Chuyển sang Modal chờ xác nhận
+                document.getElementById('pending-state').classList.remove('hidden');
+                document.getElementById('success-state').classList.add('hidden');
+                document.getElementById('reject-state').classList.add('hidden');
+                document.getElementById('pending-modal').classList.remove('hidden');
+
+                startCheckingOrderStatus();
+            } catch (e) {
+                alert("Có lỗi xảy ra khi xác nhận thanh toán!");
+            } finally {
+                if (btnSubmit) btnSubmit.disabled = false;
+            }
+        }
+
+        function startCheckingOrderStatus() {
+            if (statusCheckTimer) clearInterval(statusCheckTimer);
+
+            statusCheckTimer = setInterval(async () => {
+                if (!currentOrderId) return;
+
+                try {
+                    let res = await fetch(`/api/check-order-status/${currentOrderId}`);
+                    let data = await res.json();
+
+                    if (data.success) {
+                        if (data.status === 'SUCCESS') {
+                            clearInterval(statusCheckTimer);
+                            localStorage.removeItem('active_order_id');
+                            
+                            document.getElementById('success-coin-amount').innerText = currentSelectedCoins.toLocaleString('vi-VN') + ' Xu';
+                            
+                            document.getElementById('pending-state').classList.add('hidden');
+                            document.getElementById('success-state').classList.remove('hidden');
+                            checkUserSpins();
+                        } else if (data.status === 'REJECTED') {
+                            clearInterval(statusCheckTimer);
+                            localStorage.removeItem('active_order_id');
+                            document.getElementById('pending-state').classList.add('hidden');
+                            document.getElementById('reject-state').classList.remove('hidden');
+                        }
+                    }
+                } catch (e) {}
+            }, 3000);
+        }
+
+        function closePendingModal() {
+            if (statusCheckTimer) clearInterval(statusCheckTimer);
+            localStorage.removeItem('active_order_id');
+            document.getElementById('pending-modal').classList.add('hidden');
+        }
+
+        function closeQrModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        // --- HÀM XỬ LÝ VÒNG QUAY MAY MẮN ---
+        async function checkUserSpins() {
+            let savedUser = localStorage.getItem('tiktok_saved_user');
+            if (!savedUser) return;
+            let userData = JSON.parse(savedUser);
+
+            try {
+                let res = await fetch(`/api/user-spins/${userData.username}`);
+                let data = await res.json();
+                if (data.success) {
+                    document.getElementById('user-spins-count').innerText = data.spins;
+                    document.getElementById('user-spins-count-mobile').innerText = data.spins;
+                    document.getElementById('modal-spins-num').innerText = data.spins;
+                }
+            } catch (e) {}
+        }
+
+        function openWheelModal() {
+            let savedUser = localStorage.getItem('tiktok_saved_user');
+            let usernameInput = document.getElementById('tiktok-username').value.trim();
+
+            if (!savedUser && !usernameInput) {
+                alert("Vui lòng nhập/đăng nhập ID TikTok trước khi tham gia Vòng quay!");
+                document.getElementById('tiktok-username').focus();
+                return;
+            }
+            checkUserSpins();
+            document.getElementById('wheel-modal').classList.remove('hidden');
+        }
+
+        function closeWheelModal() {
+            document.getElementById('wheel-modal').classList.add('hidden');
+        }
+
+        async function spinWheelAction() {
+            let savedUser = localStorage.getItem('tiktok_saved_user');
+            let username = savedUser ? JSON.parse(savedUser).username : document.getElementById('tiktok-username').value.trim().replace('@', '');
+
+            if (!username) {
+                alert("Vui lòng nhập/đăng nhập ID TikTok!");
+                return;
+            }
+
+            let btn = document.getElementById('btn-spin');
+            btn.disabled = true;
+            btn.innerText = "ĐANG QUAY...";
+
+            try {
+                let res = await fetch('/api/spin-wheel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                let data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('wheel-result-display').innerHTML = `🎉 Chúc mừng bạn trúng: <br><span class="text-[#FE2C55] text-base font-extrabold">${data.prize.name}</span>`;
+                    document.getElementById('user-spins-count').innerText = data.remainingSpins;
+                    document.getElementById('user-spins-count-mobile').innerText = data.remainingSpins;
+                    document.getElementById('modal-spins-num').innerText = data.remainingSpins;
+                } else {
+                    alert(data.message || "Bạn đã hết lượt quay!");
+                }
+            } catch (e) {
+                alert("Lỗi kết nối tới máy chủ!");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "QUAY NGAY 🎰";
+            }
+        }
+    </script>
+</body>
+</html>
